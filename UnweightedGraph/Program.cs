@@ -24,6 +24,36 @@ namespace UnweightedGraph
                 }
             }
         }
+
+        public static List<T> FindPath<T>(this Graph<T> graph, T start, T end)
+        {
+            var track = new Dictionary<Node, Node>();
+            var startNode = graph.GetNodeFromDictionary(start);
+            var endNode = graph.GetNodeFromDictionary(end);
+            track[startNode] = null;
+            var queue = new Queue<Node>();
+            queue.Enqueue(startNode);
+            while (queue.Count != 0)
+            {
+                var node = queue.Dequeue();
+                foreach (var incidentEdge in node.outgoingEdges)
+                {
+                    if (track.ContainsKey(incidentEdge.To)) continue;
+                    track[incidentEdge.To] = node;
+                    queue.Enqueue(incidentEdge.To);
+                }
+                if (track.ContainsKey(endNode)) break;
+            }
+            var pathItem = endNode;
+            var result = new List<T>();
+            while (pathItem != null)
+            {
+                result.Add(graph.GetObjectByNode(pathItem));
+                pathItem = track[pathItem];
+            }
+            result.Reverse();
+            return result;
+        }
     }
 
     public class Program
@@ -52,7 +82,10 @@ namespace UnweightedGraph
             graph.AddNode(10);
             graph.AddEdge(9, 10);
 
-            foreach (var e in graph.BreadthSearch(10))
+           // foreach (var e in graph.BreadthSearch(10))
+            //    Console.WriteLine(e);
+
+            foreach (var e in graph.FindPath(1,8))
                 Console.WriteLine(e);
         }
     }
